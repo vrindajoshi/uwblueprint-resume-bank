@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { Loader2 } from "lucide-react";
-import { lovable } from "@/integrations/lovable/index";
 import { supabase } from "@/integrations/supabase/client";
 import { bootstrapSession } from "@/lib/resume.functions";
 import { Button } from "@/components/ui/button";
@@ -84,17 +83,17 @@ function LoginPage() {
   const signIn = async () => {
     setBusy(true);
     setError(null);
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
-      extraParams: { hd: "uwblueprint.org", prompt: "select_account" },
+    const { error: signInError } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: {
+        redirectTo: window.location.origin,
+        queryParams: { hd: "uwblueprint.org", prompt: "select_account" },
+      },
     });
-    if (result.error) {
-      setError(result.error.message ?? "Could not start Google sign-in.");
+    if (signInError) {
+      setError(signInError.message ?? "Could not start Google sign-in.");
       setBusy(false);
-      return;
     }
-    if (result.redirected) return;
-    await routeIn();
   };
 
   return (
