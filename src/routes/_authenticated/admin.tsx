@@ -40,8 +40,11 @@ function AdminLayout() {
               <Link
                 key={tab.to}
                 to={tab.to}
-                className="flex items-center gap-2.5 rounded-lg px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
-                activeProps={{ className: "bg-sidebar-accent text-sidebar-accent-foreground" }}
+                className="flex items-center gap-2.5 rounded-sm px-3 py-2 text-sm font-medium text-muted-foreground transition-colors hover:bg-sidebar-accent hover:text-sidebar-accent-foreground"
+                activeProps={{
+                  className:
+                    "flex items-center gap-2.5 rounded-sm !bg-transparent px-3 py-2 text-sm !font-bold !text-[#173b7a] transition-colors",
+                }}
                 activeOptions={{ exact: false }}
               >
                 <tab.icon className="h-4 w-4" />
@@ -59,7 +62,10 @@ function AdminLayout() {
                 className={cn(
                   "rounded-lg border border-border px-3 py-2 text-sm font-medium text-muted-foreground",
                 )}
-                activeProps={{ className: "bg-primary text-primary-foreground border-primary" }}
+                activeProps={{
+                  className:
+                    "rounded-lg border border-border !bg-transparent px-3 py-2 text-sm !font-bold !text-[#173b7a]",
+                }}
               >
                 {tab.label}
               </Link>

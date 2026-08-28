@@ -9,7 +9,7 @@ export function AppHeader({ email, subtitle }: { email?: string; subtitle?: stri
     <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">
       <div className="mx-auto flex h-16 max-w-6xl items-center justify-between px-6">
         <div className="flex items-center gap-3">
-          <img src="public/blueprint-logo.png" alt="UW Blueprint" className="h-9 w-9" />
+          <img src="/blueprint-logo.png" alt="UW Blueprint" className="h-9 w-9" />
           <div className="leading-tight">
             <p className="text-sm font-bold text-foreground">UW Blueprint Sponsor Resume Book</p>
             {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}

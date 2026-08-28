@@ -1,7 +1,7 @@
 import { createFileRoute } from "@tanstack/react-router";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useMemo, useState } from "react";
-import { Loader2, Search, Trash2 } from "lucide-react";
+import { useEffect, useMemo, useState } from "react";
+import { ChevronLeft, ChevronRight, Loader2, Search, Trash2 } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -31,6 +31,8 @@ import {
   type MemberWithTerm,
 } from "@/lib/queries";
 
+const MEMBERS_PER_PAGE = 50;
+
 export const Route = createFileRoute("/_authenticated/admin/members")({
   head: () => ({
     meta: [
@@ -51,10 +53,12 @@ function MembersTab() {
 
   const [search, setSearch] = useState("");
   const [term, setTerm] = useState("all");
+  const [selectMode, setSelectMode] = useState(false);
   const [selected, setSelected] = useState<string[]>([]);
   const [confirmOpen, setConfirmOpen] = useState(false);
   const [detail, setDetail] = useState<MemberWithTerm | null>(null);
   const [deleting, setDeleting] = useState(false);
+  const [page, setPage] = useState(1);
 
   const resumeCount = (memberId: string) =>
     (resumes ?? []).filter((r) => r.member_id === memberId).length;
@@ -75,6 +79,17 @@ function MembersTab() {
       )
       .sort((a, b) => (a.term_basis_date < b.term_basis_date ? 1 : -1));
   }, [members, search, term]);
+
+  useEffect(() => {
+    setPage(1);
+  }, [search, term]);
+
+  const totalPages = Math.max(1, Math.ceil(rows.length / MEMBERS_PER_PAGE));
+  const currentPage = Math.min(page, totalPages);
+  const paginatedRows = rows.slice(
+    (currentPage - 1) * MEMBERS_PER_PAGE,
+    currentPage * MEMBERS_PER_PAGE,
+  );
 
   const selectedResumeCount = selected.reduce((sum, id) => sum + resumeCount(id), 0);
 
@@ -98,6 +113,11 @@ function MembersTab() {
     }
   };
 
+  const deleteMember = (memberId: string) => {
+    setSelected([memberId]);
+    setConfirmOpen(true);
+  };
+
   if (isLoading) {
     return (
       <div className="flex h-64 items-center justify-center">
@@ -115,11 +135,28 @@ function MembersTab() {
             {rows.length} of {(members ?? []).length} members
           </p>
         </div>
-        {selected.length > 0 ? (
-          <Button variant="destructive" className="gap-2" onClick={() => setConfirmOpen(true)}>
-            <Trash2 className="h-4 w-4" /> Delete {selected.length} selected
+        <div className="flex items-center gap-2">
+          {selectMode && selected.length > 0 ? (
+            <Button
+              variant="destructive"
+              size="lg"
+              className="gap-2"
+              onClick={() => setConfirmOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" /> Delete {selected.length} selected
+            </Button>
+          ) : null}
+          <Button
+            variant="outline"
+            size="lg"
+            onClick={() => {
+              setSelectMode((previous) => !previous);
+              setSelected([]);
+            }}
+          >
+            {selectMode ? "Cancel" : "Select"}
           </Button>
-        ) : null}
+        </div>
       </div>
 
       <div className="mt-6 flex flex-wrap gap-3">
@@ -147,86 +184,100 @@ function MembersTab() {
         </Select>
       </div>
 
-      <div className="panel mt-6 overflow-x-auto">
-        <table className="w-full text-sm">
+      <div className="panel mt-6 overflow-hidden">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            {selectMode ? <col style={{ width: "4rem" }} /> : null}
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.5)" : "50%" }} />
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.25)" : "25%" }} />
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.25)" : "12.5%" }} />
+            {!selectMode ? <col style={{ width: "12.5%" }} /> : null}
+          </colgroup>
           <thead>
             <tr className="border-b border-border text-left text-xs uppercase tracking-wide text-muted-foreground">
-              <th className="w-10 px-4 py-3">
-                <Checkbox
-                  checked={rows.length > 0 && selected.length === rows.length}
-                  onCheckedChange={(checked) =>
-                    setSelected(checked ? rows.map((r) => r.id) : [])
-                  }
-                  aria-label="Select all"
-                />
-              </th>
-              <th className="px-4 py-3 font-semibold">Name</th>
-              <th className="px-4 py-3 font-semibold">Email</th>
-              <th className="px-4 py-3 font-semibold">Term</th>
-              <th className="px-4 py-3 font-semibold">LinkedIn</th>
-              <th className="px-4 py-3 font-semibold">GitHub</th>
-              <th className="px-4 py-3 font-semibold">Resumes</th>
+              {selectMode ? (
+                <th className="w-10 px-4 py-3">
+                  <Checkbox
+                    checked={
+                      paginatedRows.length > 0 &&
+                      paginatedRows.every((member) => selected.includes(member.id))
+                    }
+                    onCheckedChange={(checked) =>
+                      setSelected((previous) => {
+                        const pageIds = paginatedRows.map((member) => member.id);
+                        return checked
+                          ? Array.from(new Set([...previous, ...pageIds]))
+                          : previous.filter((id) => !pageIds.includes(id));
+                      })
+                    }
+                    aria-label="Select all"
+                    className="!rounded-sm !shadow-none"
+                  />
+                </th>
+              ) : null}
+              <th className="px-4 py-3 font-bold">Name</th>
+              <th className="px-4 py-3 font-bold">Term</th>
+              <th className="px-4 py-3 font-bold">Resumes</th>
             </tr>
           </thead>
+        </table>
+      </div>
+
+      <div className="h-3" aria-hidden="true" />
+
+      <div className="panel overflow-hidden">
+        <table className="w-full table-fixed text-sm">
+          <colgroup>
+            {selectMode ? <col style={{ width: "4rem" }} /> : null}
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.5)" : "50%" }} />
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.25)" : "25%" }} />
+            <col style={{ width: selectMode ? "calc((100% - 4rem) * 0.25)" : "12.5%" }} />
+            {!selectMode ? <col style={{ width: "12.5%" }} /> : null}
+          </colgroup>
           <tbody>
-            {rows.map((m) => (
+            {paginatedRows.map((m) => (
               <tr
                 key={m.id}
                 className="cursor-pointer border-b border-border transition-colors last:border-0 hover:bg-secondary/60"
                 onClick={() => setDetail(m)}
               >
-                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
-                  <Checkbox
-                    checked={selected.includes(m.id)}
-                    onCheckedChange={(checked) =>
-                      setSelected((prev) =>
-                        checked ? [...prev, m.id] : prev.filter((id) => id !== m.id),
-                      )
-                    }
-                    aria-label={`Select ${m.first_name}`}
-                  />
-                </td>
+                {selectMode ? (
+                  <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                    <Checkbox
+                      checked={selected.includes(m.id)}
+                      onCheckedChange={(checked) =>
+                        setSelected((prev) =>
+                          checked ? [...prev, m.id] : prev.filter((id) => id !== m.id),
+                        )
+                      }
+                      aria-label={`Select ${m.first_name}`}
+                      className="!rounded-sm !shadow-none"
+                    />
+                  </td>
+                ) : null}
                 <td className="px-4 py-3 font-medium text-foreground">
                   {m.first_name} {m.last_name}
                 </td>
-                <td className="px-4 py-3 text-muted-foreground">{m.email}</td>
                 <td className="px-4 py-3 text-muted-foreground">{termLabel(m)}</td>
-                <td className="px-4 py-3">
-                  {m.linkedin_url ? (
-                    <a
-                      href={m.linkedin_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Link
-                    </a>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </td>
-                <td className="px-4 py-3">
-                  {m.github_url ? (
-                    <a
-                      href={m.github_url}
-                      target="_blank"
-                      rel="noreferrer"
-                      className="text-primary hover:underline"
-                      onClick={(e) => e.stopPropagation()}
-                    >
-                      Link
-                    </a>
-                  ) : (
-                    <span className="text-muted-foreground">—</span>
-                  )}
-                </td>
                 <td className="px-4 py-3 text-muted-foreground">{resumeCount(m.id)}</td>
+                {!selectMode ? (
+                  <td className="px-4 py-3 text-right" onClick={(e) => e.stopPropagation()}>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="text-muted-foreground shadow-none hover:text-destructive"
+                      onClick={() => deleteMember(m.id)}
+                      aria-label={`Delete ${m.first_name} ${m.last_name}`}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </td>
+                ) : null}
               </tr>
             ))}
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="px-4 py-12 text-center text-muted-foreground">
+                <td colSpan={selectMode ? 4 : 4} className="px-4 py-12 text-center text-muted-foreground">
                   No members match your filters.
                 </td>
               </tr>
@@ -235,10 +286,44 @@ function MembersTab() {
         </table>
       </div>
 
+      {totalPages > 1 ? (
+        <div className="mt-4 flex items-center justify-between gap-4">
+          <p className="text-sm text-muted-foreground">
+            Page {currentPage} of {totalPages}
+          </p>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((previous) => Math.max(1, previous - 1))}
+              disabled={currentPage === 1}
+              aria-label="Previous page"
+            >
+              <ChevronLeft className="h-4 w-4" />
+              Previous
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPage((previous) => Math.min(totalPages, previous + 1))}
+              disabled={currentPage === totalPages}
+              aria-label="Next page"
+            >
+              Next
+              <ChevronRight className="h-4 w-4" />
+            </Button>
+          </div>
+        </div>
+      ) : null}
+
       <Dialog open={confirmOpen} onOpenChange={setConfirmOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete members?</DialogTitle>
+            <DialogTitle>
+              {selected.length === 1
+                ? `Delete "${members?.find((member) => member.id === selected[0])?.first_name ?? ""} ${members?.find((member) => member.id === selected[0])?.last_name ?? ""}"?`
+                : "Delete members?"}
+            </DialogTitle>
             <DialogDescription>
               This will permanently delete {selected.length} member
               {selected.length === 1 ? "" : "s"} and {selectedResumeCount} resume

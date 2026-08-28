@@ -35,27 +35,39 @@ function CategoriesTab() {
   const { data: categories, isLoading } = useQuery(categoriesQuery);
   const { data: resumes } = useQuery(allResumesQuery);
 
-  const [name, setName] = useState("");
   const [createError, setCreateError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
   const [renaming, setRenaming] = useState<Category | null>(null);
+  const [pendingCategoryId, setPendingCategoryId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState("");
   const [renameError, setRenameError] = useState<string | null>(null);
   const [deleting, setDeleting] = useState<Category | null>(null);
 
   const countFor = (id: string) => (resumes ?? []).filter((r) => r.category_id === id).length;
 
+  const nextUntitledName = () => {
+    const names = new Set((categories ?? []).map((category) => category.name.toLowerCase()));
+    let index = 0;
+    let candidate = "Untitled";
+    while (names.has(candidate.toLowerCase())) {
+      index += 1;
+      candidate = `Untitled ${index}`;
+    }
+    return candidate;
+  };
+
   const create = async () => {
     setCreateError(null);
-    const trimmed = name.trim();
-    if (!trimmed) return setCreateError("Enter a category name.");
     if ((categories ?? []).length >= MAX_CATEGORIES) {
       return setCreateError(`You can have at most ${MAX_CATEGORIES} categories.`);
     }
     setBusy(true);
-    const { data, error: debugError } = await supabase.rpc("debug_whoami");
-    console.log(data, debugError);
-    const { error } = await supabase.from("categories").insert({ name: trimmed });
+    const initialName = nextUntitledName();
+    const { data: created, error } = await supabase
+      .from("categories")
+      .insert({ name: initialName })
+      .select()
+      .single();
     setBusy(false);
     if (error) {
       setCreateError(
@@ -63,9 +75,15 @@ function CategoriesTab() {
       );
       return;
     }
-    setName("");
+    if (!created) {
+      setCreateError("The category was created, but could not be opened for renaming.");
+      return;
+    }
+    setRenameValue(initialName);
+    setRenaming(created as Category);
+    setPendingCategoryId(created.id);
     await queryClient.invalidateQueries({ queryKey: ["categories"] });
-    toast.success("Category created.");
+    toast.success("Category added. Enter a name to finish.");
   };
 
   
@@ -88,6 +106,7 @@ function CategoriesTab() {
       return;
     }
     setRenaming(null);
+    setPendingCategoryId(null);
     await queryClient.invalidateQueries();
     toast.success("Category renamed.");
   };
@@ -124,65 +143,114 @@ function CategoriesTab() {
     <div>
       <h1 className="text-2xl font-bold text-foreground">Resume Categories</h1>
 
-      <div className="panel mt-6 p-5">
-        <label className="field-label">Create category</label>
-        <div className="flex flex-wrap gap-3">
-          <Input
-            value={name}
-            placeholder="e.g. Product Management"
-            className="min-w-56 flex-1"
-            onChange={(e) => {
-              setName(e.target.value);
-              setCreateError(null);
-            }}
-            onKeyDown={(e) => e.key === "Enter" && void create()}
-          />
-          <Button onClick={() => void create()} disabled={busy} className="gap-2">
-            <Plus className="h-4 w-4" /> Create
-          </Button>
+      <div className="panel mt-6 overflow-hidden rounded-md shadow-none">
+        <div className="hidden grid-cols-[minmax(0,1fr)_7rem_9rem] gap-3 border-b border-border px-5 py-3 text-left text-xs font-semibold uppercase tracking-wide text-muted-foreground sm:grid">
+          <span>Category</span>
+          <span>Resumes</span>
         </div>
-        {createError ? <p className="mt-2 text-xs text-destructive">{createError}</p> : null}
       </div>
 
-      <div className="panel mt-6 divide-y divide-border">
+      <div className="h-3" aria-hidden="true" />
+
+      <div className="panel overflow-hidden rounded-md shadow-none">
         {(categories ?? []).length === 0 ? (
-          <p className="px-5 py-12 text-center text-sm text-muted-foreground">
+          <p className="py-12 text-center text-sm text-muted-foreground">
             No categories yet.
           </p>
         ) : null}
         {(categories ?? []).map((category) => (
-          <div key={category.id} className="flex items-center justify-between gap-3 px-5 py-4">
+          <div
+            key={category.id}
+            className="grid grid-cols-[minmax(0,1fr)_auto] items-center gap-3 border-b border-border px-5 py-4 transition-colors last:border-0 hover:bg-secondary/60 sm:grid-cols-[minmax(0,1fr)_7rem_9rem]"
+          >
             <Link
               to="/admin/categories/$categoryId"
               params={{ categoryId: category.id }}
               className="group flex min-w-0 flex-1 items-center gap-2"
             >
               <div className="min-w-0">
-                <p className="truncate font-semibold text-foreground group-hover:text-primary">
-                  {category.name}
-                </p>
-                <p className="text-xs text-muted-foreground">
+                {renaming?.id === category.id ? (
+                  <Input
+                    value={renameValue}
+                    onChange={(e) => {
+                      setRenameValue(e.target.value);
+                      setRenameError(null);
+                    }}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void rename();
+                      }
+                      if (e.key === "Escape") {
+                        if (pendingCategoryId === category.id) {
+                          void supabase
+                            .from("categories")
+                            .delete()
+                            .eq("id", category.id)
+                            .then(() => {
+                              setRenaming(null);
+                              setPendingCategoryId(null);
+                              void queryClient.invalidateQueries({ queryKey: ["categories"] });
+                            });
+                        } else {
+                          setRenaming(null);
+                        }
+                      }
+                    }}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                    }}
+                    onFocus={(e) => e.currentTarget.select()}
+                    autoFocus
+                    aria-label="Category name"
+                    className="h-8 max-w-sm font-semibold"
+                  />
+                ) : (
+                  <p className="truncate font-semibold text-foreground group-hover:text-primary">
+                    {category.name}
+                  </p>
+                )}
+                <p className="text-xs text-muted-foreground sm:hidden">
                   {countFor(category.id)} resume{countFor(category.id) === 1 ? "" : "s"}
                 </p>
+                {renaming?.id === category.id && renameError ? (
+                  <p className="mt-1 text-xs text-destructive">{renameError}</p>
+                ) : null}
               </div>
               <ChevronRight className="h-4 w-4 shrink-0 text-muted-foreground" />
             </Link>
+            <p className="hidden text-sm text-muted-foreground sm:block">{countFor(category.id)}</p>
             <div className="flex gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setRenaming(category);
-                  setRenameValue(category.name);
-                  setRenameError(null);
-                }}
-              >
-                Rename
-              </Button>
+              {renaming?.id === category.id ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shadow-none"
+                  onClick={() => void rename()}
+                  disabled={busy}
+                >
+                  Save
+                </Button>
+              ) : (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  className="shadow-none"
+                  onClick={() => {
+                    setRenaming(category);
+                    setPendingCategoryId(null);
+                    setRenameValue(category.name);
+                    setRenameError(null);
+                  }}
+                >
+                  Rename
+                </Button>
+              )}
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-destructive hover:text-destructive"
+                className="text-destructive shadow-none hover:text-destructive"
                 onClick={() => setDeleting(category)}
               >
                 <Trash2 className="h-4 w-4" />
@@ -192,29 +260,17 @@ function CategoriesTab() {
         ))}
       </div>
 
-      <Dialog open={Boolean(renaming)} onOpenChange={(open) => !open && setRenaming(null)}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Rename category</DialogTitle>
-          </DialogHeader>
-          <Input
-            value={renameValue}
-            onChange={(e) => {
-              setRenameValue(e.target.value);
-              setRenameError(null);
-            }}
-          />
-          {renameError ? <p className="text-xs text-destructive">{renameError}</p> : null}
-          <DialogFooter>
-            <Button variant="ghost" onClick={() => setRenaming(null)}>
-              Cancel
-            </Button>
-            <Button onClick={() => void rename()} disabled={busy}>
-              Save
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <div className="mt-6">
+        <Button
+          onClick={() => void create()}
+          disabled={busy}
+          variant="outline"
+          className="gap-2 shadow-none"
+        >
+          <Plus className="h-4 w-4" /> Add category
+        </Button>
+        {createError ? <p className="mt-2 text-xs text-destructive">{createError}</p> : null}
+      </div>
 
       <Dialog open={Boolean(deleting)} onOpenChange={(open) => !open && setDeleting(null)}>
         <DialogContent>
