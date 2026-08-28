@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sign in — UW Blueprint Resume Book" },
+      { title: "UW Blueprint Sponsor Resume Book" },
       {
         name: "description",
         content:
           "Sign in with your uwblueprint.org Google account to manage your resumes and profile.",
       },
-      { property: "og:title", content: "Sign in — UW Blueprint Resume Book" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       {
         property: "og:description",
         content: "Resume collection platform for UW Blueprint members and recruiting leads.",
@@ -105,7 +105,7 @@ function LoginPage() {
             alt="UW Blueprint"
             className="mx-auto mb-6 h-16 w-16"
           />
-          <h1 className="text-2xl font-bold text-foreground">UW Blueprint Resume Book</h1>
+          <h1 className="text-2xl font-bold text-foreground">UW Blueprint Sponsor Resume Book</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in with your <span className="font-medium text-foreground">uwblueprint.org</span>{" "}
             Google account, and share your resume with sponsors.

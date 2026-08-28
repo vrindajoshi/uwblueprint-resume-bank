@@ -12,9 +12,9 @@ import { categoriesQuery, myMemberQuery, myResumesQuery, signedUrlFor } from "@/
 export const Route = createFileRoute("/_authenticated/profile")({
   head: () => ({
     meta: [
-      { title: "My profile — UW Blueprint Resume Book" },
+      { title: "UW Blueprint Sponsor Resume Book" },
       { name: "description", content: "View and update your UW Blueprint member profile and resumes." },
-      { property: "og:title", content: "My profile — UW Blueprint Resume Book" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       { property: "og:description", content: "View and update your member profile and resumes." },
     ],
   }),

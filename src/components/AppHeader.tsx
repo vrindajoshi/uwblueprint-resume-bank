@@ -11,7 +11,7 @@ export function AppHeader({ email, subtitle }: { email?: string; subtitle?: stri
         <div className="flex items-center gap-3">
           <img src="public/blueprint-logo.png" alt="UW Blueprint" className="h-9 w-9" />
           <div className="leading-tight">
-            <p className="text-sm font-bold text-foreground">UW Blueprint Resume Book</p>
+            <p className="text-sm font-bold text-foreground">UW Blueprint Sponsor Resume Book</p>
             {subtitle ? <p className="text-xs text-muted-foreground">{subtitle}</p> : null}
           </div>
         </div>

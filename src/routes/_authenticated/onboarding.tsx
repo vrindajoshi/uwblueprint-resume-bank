@@ -10,9 +10,9 @@ import { categoriesQuery, myMemberQuery, myResumesQuery } from "@/lib/queries";
 export const Route = createFileRoute("/_authenticated/onboarding")({
   head: () => ({
     meta: [
-      { title: "Set up your profile — UW Blueprint Resume Book" },
+      { title: "UW Blueprint Sponsor Resume Book" },
       { name: "description", content: "Complete your UW Blueprint member profile and upload your resumes." },
-      { property: "og:title", content: "Set up your profile — UW Blueprint Resume Book" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       { property: "og:description", content: "Complete your member profile and upload your resumes." },
     ],
   }),
