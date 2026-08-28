@@ -108,7 +108,7 @@ export function MemberEditor({
           </div>
         </div>
         <p className="mt-3 text-xs text-muted-foreground">
-          Contact an admin to correct your name.
+          Contact a VPE to change your name if required. 
         </p>
       </section>
 

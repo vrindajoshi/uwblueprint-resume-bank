@@ -8,13 +8,13 @@ import { Button } from "@/components/ui/button";
 export const Route = createFileRoute("/")({
   head: () => ({
     meta: [
-      { title: "Sign in — UW Blueprint Resume Hub" },
+      { title: "Sign in — UW Blueprint Resume Book" },
       {
         name: "description",
         content:
           "Sign in with your uwblueprint.org Google account to manage your resumes and profile.",
       },
-      { property: "og:title", content: "Sign in — UW Blueprint Resume Hub" },
+      { property: "og:title", content: "Sign in — UW Blueprint Resume Book" },
       {
         property: "og:description",
         content: "Resume collection platform for UW Blueprint members and recruiting leads.",
@@ -100,13 +100,15 @@ function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-md">
         <div className="panel px-8 py-10 text-center">
-          <div className="mx-auto mb-6 flex h-12 w-12 items-center justify-center rounded-xl bg-primary text-lg font-extrabold text-primary-foreground">
-            B
-          </div>
-          <h1 className="text-2xl font-bold text-foreground">UW Blueprint Resume Hub</h1>
+          <img
+            src="public/blueprint-logo.png"
+            alt="UW Blueprint"
+            className="mx-auto mb-6 h-16 w-16"
+          />
+          <h1 className="text-2xl font-bold text-foreground">UW Blueprint Resume Book</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in with your <span className="font-medium text-foreground">uwblueprint.org</span>{" "}
-            Google account to manage your profile and resumes.
+            Google account, and share your resume with sponsors.
           </p>
 
           <Button
@@ -127,7 +129,7 @@ function LoginPage() {
           ) : null}
         </div>
         <p className="mt-6 text-center text-xs text-muted-foreground">
-          Access is limited to UW Blueprint members. Other Google accounts are rejected.
+          For UW Blueprint members only.
         </p>
       </div>
     </main>

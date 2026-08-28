@@ -79,7 +79,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "UW Blueprint Resume Hub" },
+      { title: "UW Blueprint Resume Book" },
       { name: "description", content: "Resume collection platform for UW Blueprint members." },
       { property: "og:type", content: "website" },
       { name: "twitter:card", content: "summary_large_image" },
