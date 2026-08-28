@@ -25,9 +25,9 @@ import {
 export const Route = createFileRoute("/_authenticated/admin/categories/$categoryId")({
   head: () => ({
     meta: [
-      { title: "Category resumes — UW Blueprint Admin" },
+      { title: "UW Blueprint Sponsor Resumes Books" },
       { name: "description", content: "Review and export the resumes submitted for a category." },
-      { property: "og:title", content: "Category resumes — UW Blueprint Admin" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       { property: "og:description", content: "Review and export the resumes submitted for a category." },
     ],
   }),

@@ -21,9 +21,9 @@ const MAX_CATEGORIES = 20;
 export const Route = createFileRoute("/_authenticated/admin/categories/")({
   head: () => ({
     meta: [
-      { title: "Categories — UW Blueprint Admin" },
+      { title: "UW Blueprint Sponsor Resume Book" },
       { name: "description", content: "Create, rename and delete resume categories for UW Blueprint." },
-      { property: "og:title", content: "Categories — UW Blueprint Admin" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       { property: "og:description", content: "Create, rename and delete resume categories." },
     ],
   }),
@@ -53,6 +53,8 @@ function CategoriesTab() {
       return setCreateError(`You can have at most ${MAX_CATEGORIES} categories.`);
     }
     setBusy(true);
+    const { data, error: debugError } = await supabase.rpc("debug_whoami");
+    console.log(data, debugError);
     const { error } = await supabase.from("categories").insert({ name: trimmed });
     setBusy(false);
     if (error) {
@@ -65,6 +67,8 @@ function CategoriesTab() {
     await queryClient.invalidateQueries({ queryKey: ["categories"] });
     toast.success("Category created.");
   };
+
+  
 
   const rename = async () => {
     if (!renaming) return;
@@ -118,10 +122,7 @@ function CategoriesTab() {
 
   return (
     <div>
-      <h1 className="text-2xl font-bold text-foreground">Categories</h1>
-      <p className="mt-1 text-sm text-muted-foreground">
-        {(categories ?? []).length} of {MAX_CATEGORIES} categories used
-      </p>
+      <h1 className="text-2xl font-bold text-foreground">Resume Categories</h1>
 
       <div className="panel mt-6 p-5">
         <label className="field-label">Create category</label>

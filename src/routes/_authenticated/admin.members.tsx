@@ -34,9 +34,9 @@ import {
 export const Route = createFileRoute("/_authenticated/admin/members")({
   head: () => ({
     meta: [
-      { title: "Members — UW Blueprint Admin" },
+      { title: "UW Blueprint Sponsor Resume Book" },
       { name: "description", content: "Browse, search and manage UW Blueprint member profiles and resumes." },
-      { property: "og:title", content: "Members — UW Blueprint Admin" },
+      { property: "og:title", content: "UW Blueprint Sponsor Resume Book" },
       { property: "og:description", content: "Browse, search and manage member profiles and resumes." },
     ],
   }),
