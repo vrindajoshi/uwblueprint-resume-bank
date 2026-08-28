@@ -52,8 +52,15 @@ export function MemberEditor({
     (["linkedin_url", "github_url", "portfolio_url"] as const).forEach((key) => {
       if (!isValidUrl(links[key])) nextErrors[key] = "Enter a valid URL (https://…).";
     });
-    Object.entries(errors).forEach(([k, v]) => {
-      if (v) nextErrors[k] = v;
+    Object.entries(errors).forEach(([key, value]) => {
+      if (
+        value &&
+        key !== "linkedin_url" &&
+        key !== "github_url" &&
+        key !== "portfolio_url"
+      ) {
+        nextErrors[key] = value;
+      }
     });
     setErrors(nextErrors);
     if (Object.keys(nextErrors).length > 0) {
@@ -123,7 +130,14 @@ export function MemberEditor({
             <Input
               value={links[key]}
               placeholder={placeholder}
-              onChange={(e) => setLinks((prev) => ({ ...prev, [key]: e.target.value }))}
+              onChange={(e) => {
+                setLinks((prev) => ({ ...prev, [key]: e.target.value }));
+                setErrors((prev) => {
+                  const next = { ...prev };
+                  delete next[key];
+                  return next;
+                });
+              }}
               aria-invalid={Boolean(errors[key])}
             />
             {errors[key] ? <p className="mt-1.5 text-xs text-destructive">{errors[key]}</p> : null}
