@@ -52,6 +52,9 @@ function createSupabaseClient() {
       storage: brokeredPreviewStorage(),
       persistSession: true,
       autoRefreshToken: true,
+      // PKCE keeps the OAuth redirect carrying only a single-use `code`, never the
+      // access/refresh token itself, so nothing sensitive is ever exposed in the URL.
+      flowType: 'pkce',
     }
   });
 }
