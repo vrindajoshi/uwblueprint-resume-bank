@@ -114,6 +114,156 @@ export type Database = {
           },
         ]
       }
+      sponsors: {
+        Row: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          name: string
+          slug: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          name?: string
+          slug?: string
+        }
+        Relationships: []
+      }
+      sponsor_emails: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          sponsor_id: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          sponsor_id: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_emails_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_category_access: {
+        Row: {
+          category_id: string
+          created_at: string
+          sponsor_id: string
+        }
+        Insert: {
+          category_id: string
+          created_at?: string
+          sponsor_id: string
+        }
+        Update: {
+          category_id?: string
+          created_at?: string
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_category_access_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "sponsor_category_access_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_perks: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          sponsor_id: string
+          status: string
+        }
+        Insert: {
+          created_at?: string
+          description: string
+          id?: string
+          sponsor_id: string
+          status?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          sponsor_id?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_perks_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      sponsor_otp_requests: {
+        Row: {
+          attempt_count: number
+          consumed: boolean
+          email: string
+          expires_at: string
+          requested_at: string
+          sponsor_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          consumed?: boolean
+          email: string
+          expires_at: string
+          requested_at?: string
+          sponsor_id: string
+        }
+        Update: {
+          attempt_count?: number
+          consumed?: boolean
+          email?: string
+          expires_at?: string
+          requested_at?: string
+          sponsor_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "sponsor_otp_requests_sponsor_id_fkey"
+            columns: ["sponsor_id"]
+            isOneToOne: false
+            referencedRelation: "sponsors"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       members_with_term: {
@@ -135,8 +285,24 @@ export type Database = {
       }
     }
     Functions: {
+      admin_create_sponsor: {
+        Args: {
+          p_category_ids: string[]
+          p_emails: string[]
+          p_name: string
+          p_perks: string[]
+        }
+        Returns: {
+          created_at: string
+          id: string
+          name: string
+          slug: string
+        }
+      }
+      current_sponsor_id: { Args: never; Returns: string }
       is_admin: { Args: never; Returns: boolean }
       is_blueprint: { Args: never; Returns: boolean }
+      is_sponsor_contact: { Args: never; Returns: boolean }
       jwt_email: { Args: never; Returns: string }
     }
     Enums: {

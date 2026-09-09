@@ -11,12 +11,17 @@
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
+import { Route as SponsorRouteRouteImport } from './routes/_sponsor/route'
+import { Route as SponsorsRouteImport } from './routes/sponsors'
 import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/admin'
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
+import { Route as SponsorSponsorRouteImport } from './routes/_sponsor/sponsor'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesCategoryIdRouteImport } from './routes/_authenticated/admin.categories.$categoryId'
+import { Route as AuthenticatedAdminSponsorsIndexRouteImport } from './routes/_authenticated/admin.sponsors.index'
+import { Route as AuthenticatedAdminSponsorsSponsorSlugRouteImport } from './routes/_authenticated/admin.sponsors.$sponsorSlug'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -25,6 +30,15 @@ const IndexRoute = IndexRouteImport.update({
 } as any)
 const AuthenticatedRouteRoute = AuthenticatedRouteRouteImport.update({
   id: '/_authenticated',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorRouteRoute = SponsorRouteRouteImport.update({
+  id: '/_sponsor',
+  getParentRoute: () => rootRouteImport,
+} as any)
+const SponsorsRoute = SponsorsRouteImport.update({
+  id: '/sponsors',
+  path: '/sponsors',
   getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminRoute = AuthenticatedAdminRouteImport.update({
@@ -41,6 +55,11 @@ const AuthenticatedProfileRoute = AuthenticatedProfileRouteImport.update({
   id: '/profile',
   path: '/profile',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const SponsorSponsorRoute = SponsorSponsorRouteImport.update({
+  id: '/sponsor',
+  path: '/sponsor',
+  getParentRoute: () => SponsorRouteRoute,
 } as any)
 const AuthenticatedAdminMembersRoute =
   AuthenticatedAdminMembersRouteImport.update({
@@ -60,70 +79,110 @@ const AuthenticatedAdminCategoriesCategoryIdRoute =
     path: '/categories/$categoryId',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const AuthenticatedAdminSponsorsIndexRoute =
+  AuthenticatedAdminSponsorsIndexRouteImport.update({
+    id: '/sponsors/',
+    path: '/sponsors/',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
+const AuthenticatedAdminSponsorsSponsorSlugRoute =
+  AuthenticatedAdminSponsorsSponsorSlugRouteImport.update({
+    id: '/sponsors/$sponsorSlug',
+    path: '/sponsors/$sponsorSlug',
+    getParentRoute: () => AuthenticatedAdminRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
+  '/sponsors': typeof SponsorsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/sponsor': typeof SponsorSponsorRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
+  '/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
+  '/admin/sponsors/': typeof AuthenticatedAdminSponsorsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
+  '/sponsors': typeof SponsorsRoute
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
+  '/sponsor': typeof SponsorSponsorRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
   '/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
+  '/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
+  '/admin/sponsors': typeof AuthenticatedAdminSponsorsIndexRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
+  '/_sponsor': typeof SponsorRouteRouteWithChildren
+  '/sponsors': typeof SponsorsRoute
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
+  '/_sponsor/sponsor': typeof SponsorSponsorRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
   '/_authenticated/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
+  '/_authenticated/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
+  '/_authenticated/admin/sponsors/': typeof AuthenticatedAdminSponsorsIndexRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
   fullPaths:
     | '/'
+    | '/sponsors'
     | '/admin'
     | '/onboarding'
     | '/profile'
+    | '/sponsor'
     | '/admin/members'
     | '/admin/categories/$categoryId'
+    | '/admin/sponsors/$sponsorSlug'
     | '/admin/categories/'
+    | '/admin/sponsors/'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
+    | '/sponsors'
     | '/admin'
     | '/onboarding'
     | '/profile'
+    | '/sponsor'
     | '/admin/members'
     | '/admin/categories/$categoryId'
+    | '/admin/sponsors/$sponsorSlug'
     | '/admin/categories'
+    | '/admin/sponsors'
   id:
     | '__root__'
     | '/'
     | '/_authenticated'
+    | '/_sponsor'
+    | '/sponsors'
     | '/_authenticated/admin'
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
+    | '/_sponsor/sponsor'
     | '/_authenticated/admin/members'
     | '/_authenticated/admin/categories/$categoryId'
+    | '/_authenticated/admin/sponsors/$sponsorSlug'
     | '/_authenticated/admin/categories/'
+    | '/_authenticated/admin/sponsors/'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
+  SponsorRouteRoute: typeof SponsorRouteRouteWithChildren
+  SponsorsRoute: typeof SponsorsRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -140,6 +199,20 @@ declare module '@tanstack/react-router' {
       path: ''
       fullPath: '/'
       preLoaderRoute: typeof AuthenticatedRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/_sponsor': {
+      id: '/_sponsor'
+      path: ''
+      fullPath: '/'
+      preLoaderRoute: typeof SponsorRouteRouteImport
+      parentRoute: typeof rootRouteImport
+    }
+    '/sponsors': {
+      id: '/sponsors'
+      path: '/sponsors'
+      fullPath: '/sponsors'
+      preLoaderRoute: typeof SponsorsRouteImport
       parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin': {
@@ -163,6 +236,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedProfileRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
     }
+    '/_sponsor/sponsor': {
+      id: '/_sponsor/sponsor'
+      path: '/sponsor'
+      fullPath: '/sponsor'
+      preLoaderRoute: typeof SponsorSponsorRouteImport
+      parentRoute: typeof SponsorRouteRoute
+    }
     '/_authenticated/admin/members': {
       id: '/_authenticated/admin/members'
       path: '/members'
@@ -184,21 +264,40 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AuthenticatedAdminCategoriesCategoryIdRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
     }
+    '/_authenticated/admin/sponsors/': {
+      id: '/_authenticated/admin/sponsors/'
+      path: '/sponsors'
+      fullPath: '/admin/sponsors/'
+      preLoaderRoute: typeof AuthenticatedAdminSponsorsIndexRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_authenticated/admin/sponsors/$sponsorSlug': {
+      id: '/_authenticated/admin/sponsors/$sponsorSlug'
+      path: '/sponsors/$sponsorSlug'
+      fullPath: '/admin/sponsors/$sponsorSlug'
+      preLoaderRoute: typeof AuthenticatedAdminSponsorsSponsorSlugRouteImport
+      parentRoute: typeof AuthenticatedAdminRoute
+    }
   }
 }
 
 interface AuthenticatedAdminRouteChildren {
   AuthenticatedAdminMembersRoute: typeof AuthenticatedAdminMembersRoute
   AuthenticatedAdminCategoriesCategoryIdRoute: typeof AuthenticatedAdminCategoriesCategoryIdRoute
+  AuthenticatedAdminSponsorsSponsorSlugRoute: typeof AuthenticatedAdminSponsorsSponsorSlugRoute
   AuthenticatedAdminCategoriesIndexRoute: typeof AuthenticatedAdminCategoriesIndexRoute
+  AuthenticatedAdminSponsorsIndexRoute: typeof AuthenticatedAdminSponsorsIndexRoute
 }
 
 const AuthenticatedAdminRouteChildren: AuthenticatedAdminRouteChildren = {
   AuthenticatedAdminMembersRoute: AuthenticatedAdminMembersRoute,
   AuthenticatedAdminCategoriesCategoryIdRoute:
     AuthenticatedAdminCategoriesCategoryIdRoute,
+  AuthenticatedAdminSponsorsSponsorSlugRoute:
+    AuthenticatedAdminSponsorsSponsorSlugRoute,
   AuthenticatedAdminCategoriesIndexRoute:
     AuthenticatedAdminCategoriesIndexRoute,
+  AuthenticatedAdminSponsorsIndexRoute: AuthenticatedAdminSponsorsIndexRoute,
 }
 
 const AuthenticatedAdminRouteWithChildren =
@@ -219,9 +318,23 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface SponsorRouteRouteChildren {
+  SponsorSponsorRoute: typeof SponsorSponsorRoute
+}
+
+const SponsorRouteRouteChildren: SponsorRouteRouteChildren = {
+  SponsorSponsorRoute: SponsorSponsorRoute,
+}
+
+const SponsorRouteRouteWithChildren = SponsorRouteRoute._addFileChildren(
+  SponsorRouteRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
+  SponsorRouteRoute: SponsorRouteRouteWithChildren,
+  SponsorsRoute: SponsorsRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
