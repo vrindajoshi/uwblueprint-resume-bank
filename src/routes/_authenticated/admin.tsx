@@ -1,6 +1,6 @@
 import { createFileRoute, Link, Outlet, useNavigate } from "@tanstack/react-router";
 import { useEffect } from "react";
-import { FolderTree, Loader2, Users } from "lucide-react";
+import { FolderTree, Handshake, Loader2, Users } from "lucide-react";
 import { AppHeader } from "@/components/AppHeader";
 import { useSessionInfo } from "@/lib/session";
 import { cn } from "@/lib/utils";
@@ -28,6 +28,7 @@ function AdminLayout() {
   const tabs = [
     { to: "/admin/members", label: "Members", icon: Users },
     { to: "/admin/categories", label: "Categories", icon: FolderTree },
+    { to: "/admin/sponsors", label: "Sponsors", icon: Handshake },
   ] as const;
 
   return (

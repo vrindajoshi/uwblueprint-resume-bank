@@ -88,6 +88,79 @@ export const allResumesQuery = queryOptions({
   },
 });
 
+export type Sponsor = { id: string; name: string; slug: string; created_at: string };
+
+export type SponsorEmail = {
+  id: string;
+  sponsor_id: string;
+  email: string;
+  created_at: string;
+};
+
+export type SponsorCategoryAccess = {
+  sponsor_id: string;
+  category_id: string;
+  created_at: string;
+};
+
+export type PerkStatus = "not_redeemed" | "redeemed";
+
+export type SponsorPerk = {
+  id: string;
+  sponsor_id: string;
+  description: string;
+  status: PerkStatus;
+  created_at: string;
+};
+
+export const sponsorsQuery = queryOptions({
+  queryKey: ["admin", "sponsors"],
+  queryFn: async (): Promise<Sponsor[]> => {
+    const { data, error } = await supabase.from("sponsors").select("*").order("name");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as Sponsor[];
+  },
+});
+
+export const allSponsorEmailsQuery = queryOptions({
+  queryKey: ["admin", "sponsor-emails"],
+  queryFn: async (): Promise<SponsorEmail[]> => {
+    const { data, error } = await supabase.from("sponsor_emails").select("*");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SponsorEmail[];
+  },
+});
+
+export const allSponsorCategoryAccessQuery = queryOptions({
+  queryKey: ["admin", "sponsor-category-access"],
+  queryFn: async (): Promise<SponsorCategoryAccess[]> => {
+    const { data, error } = await supabase.from("sponsor_category_access").select("*");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SponsorCategoryAccess[];
+  },
+});
+
+export const allSponsorPerksQuery = queryOptions({
+  queryKey: ["admin", "sponsor-perks"],
+  queryFn: async (): Promise<SponsorPerk[]> => {
+    const { data, error } = await supabase.from("sponsor_perks").select("*");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SponsorPerk[];
+  },
+});
+
+export const BLUEPRINT_DOMAIN = "uwblueprint.org";
+
+export function validateSponsorEmail(value: string): string | null {
+  const trimmed = value.trim();
+  if (!trimmed) return "Enter an email address.";
+  if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(trimmed)) return "Enter a valid email address.";
+  if (trimmed.toLowerCase().endsWith(`@${BLUEPRINT_DOMAIN}`)) {
+    return `Sponsor contacts can't use a ${BLUEPRINT_DOMAIN} email.`;
+  }
+  return null;
+}
+
 export function termLabel(m: { term_season: string; term_year: number }) {
   return `${m.term_season} ${m.term_year}`;
 }
