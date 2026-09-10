@@ -100,11 +100,7 @@ function LoginPage() {
     <main className="flex min-h-screen items-center justify-center bg-background px-6">
       <div className="w-full max-w-md">
         <div className="panel px-8 py-10 text-center">
-          <img
-            src="public/blueprint-logo.png"
-            alt="UW Blueprint"
-            className="mx-auto mb-6 h-16 w-16"
-          />
+          <img src="/blueprint-logo.png" alt="UW Blueprint" className="mx-auto mb-6 h-16 w-16" />
           <h1 className="text-2xl font-bold text-foreground">UW Blueprint Sponsor Resume Book</h1>
           <p className="mt-2 text-sm text-muted-foreground">
             Sign in with your <span className="font-medium text-foreground">uwblueprint.org</span>{" "}
