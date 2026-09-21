@@ -367,6 +367,7 @@ export type Database = {
       is_blueprint: { Args: never; Returns: boolean }
       is_sponsor_contact: { Args: never; Returns: boolean }
       jwt_email: { Args: never; Returns: string }
+      sponsor_granted_category_ids: { Args: never; Returns: string[] }
       sponsor_visible_member_ids: { Args: never; Returns: string[] }
     }
     Enums: {
