@@ -17,11 +17,17 @@ import { Route as AuthenticatedAdminRouteImport } from './routes/_authenticated/
 import { Route as AuthenticatedOnboardingRouteImport } from './routes/_authenticated/onboarding'
 import { Route as AuthenticatedProfileRouteImport } from './routes/_authenticated/profile'
 import { Route as SponsorSponsorRouteImport } from './routes/_sponsor/sponsor'
+import { Route as SponsorsResetPasswordRouteImport } from './routes/sponsors.reset-password'
 import { Route as AuthenticatedAdminMembersRouteImport } from './routes/_authenticated/admin.members'
+import { Route as SponsorSponsorIndexRouteImport } from './routes/_sponsor/sponsor.index'
+import { Route as SponsorSponsorMembersRouteImport } from './routes/_sponsor/sponsor.members'
+import { Route as SponsorSponsorPerksRouteImport } from './routes/_sponsor/sponsor.perks'
+import { Route as SponsorSponsorResumesRouteImport } from './routes/_sponsor/sponsor.resumes'
 import { Route as AuthenticatedAdminCategoriesIndexRouteImport } from './routes/_authenticated/admin.categories.index'
 import { Route as AuthenticatedAdminCategoriesCategoryIdRouteImport } from './routes/_authenticated/admin.categories.$categoryId'
 import { Route as AuthenticatedAdminSponsorsIndexRouteImport } from './routes/_authenticated/admin.sponsors.index'
 import { Route as AuthenticatedAdminSponsorsSponsorSlugRouteImport } from './routes/_authenticated/admin.sponsors.$sponsorSlug'
+import { Route as SponsorSponsorResumesCategoryIdRouteImport } from './routes/_sponsor/sponsor.resumes.$categoryId'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -61,12 +67,37 @@ const SponsorSponsorRoute = SponsorSponsorRouteImport.update({
   path: '/sponsor',
   getParentRoute: () => SponsorRouteRoute,
 } as any)
+const SponsorsResetPasswordRoute = SponsorsResetPasswordRouteImport.update({
+  id: '/reset-password',
+  path: '/reset-password',
+  getParentRoute: () => SponsorsRoute,
+} as any)
 const AuthenticatedAdminMembersRoute =
   AuthenticatedAdminMembersRouteImport.update({
     id: '/members',
     path: '/members',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const SponsorSponsorIndexRoute = SponsorSponsorIndexRouteImport.update({
+  id: '/',
+  path: '/',
+  getParentRoute: () => SponsorSponsorRoute,
+} as any)
+const SponsorSponsorMembersRoute = SponsorSponsorMembersRouteImport.update({
+  id: '/members',
+  path: '/members',
+  getParentRoute: () => SponsorSponsorRoute,
+} as any)
+const SponsorSponsorPerksRoute = SponsorSponsorPerksRouteImport.update({
+  id: '/perks',
+  path: '/perks',
+  getParentRoute: () => SponsorSponsorRoute,
+} as any)
+const SponsorSponsorResumesRoute = SponsorSponsorResumesRouteImport.update({
+  id: '/resumes',
+  path: '/resumes',
+  getParentRoute: () => SponsorSponsorRoute,
+} as any)
 const AuthenticatedAdminCategoriesIndexRoute =
   AuthenticatedAdminCategoriesIndexRouteImport.update({
     id: '/categories/',
@@ -91,30 +122,47 @@ const AuthenticatedAdminSponsorsSponsorSlugRoute =
     path: '/sponsors/$sponsorSlug',
     getParentRoute: () => AuthenticatedAdminRoute,
   } as any)
+const SponsorSponsorResumesCategoryIdRoute =
+  SponsorSponsorResumesCategoryIdRouteImport.update({
+    id: '/$categoryId',
+    path: '/$categoryId',
+    getParentRoute: () => SponsorSponsorResumesRoute,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
-  '/sponsors': typeof SponsorsRoute
+  '/sponsors': typeof SponsorsRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/sponsor': typeof SponsorSponsorRoute
+  '/sponsor': typeof SponsorSponsorRouteWithChildren
+  '/sponsors/reset-password': typeof SponsorsResetPasswordRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/sponsor/members': typeof SponsorSponsorMembersRoute
+  '/sponsor/perks': typeof SponsorSponsorPerksRoute
+  '/sponsor/resumes': typeof SponsorSponsorResumesRouteWithChildren
+  '/sponsor/': typeof SponsorSponsorIndexRoute
   '/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
   '/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
+  '/sponsor/resumes/$categoryId': typeof SponsorSponsorResumesCategoryIdRoute
   '/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
   '/admin/sponsors/': typeof AuthenticatedAdminSponsorsIndexRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
-  '/sponsors': typeof SponsorsRoute
+  '/sponsors': typeof SponsorsRouteWithChildren
   '/admin': typeof AuthenticatedAdminRouteWithChildren
   '/onboarding': typeof AuthenticatedOnboardingRoute
   '/profile': typeof AuthenticatedProfileRoute
-  '/sponsor': typeof SponsorSponsorRoute
+  '/sponsors/reset-password': typeof SponsorsResetPasswordRoute
   '/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/sponsor/members': typeof SponsorSponsorMembersRoute
+  '/sponsor/perks': typeof SponsorSponsorPerksRoute
+  '/sponsor/resumes': typeof SponsorSponsorResumesRouteWithChildren
+  '/sponsor': typeof SponsorSponsorIndexRoute
   '/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
   '/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
+  '/sponsor/resumes/$categoryId': typeof SponsorSponsorResumesCategoryIdRoute
   '/admin/categories': typeof AuthenticatedAdminCategoriesIndexRoute
   '/admin/sponsors': typeof AuthenticatedAdminSponsorsIndexRoute
 }
@@ -123,14 +171,20 @@ export interface FileRoutesById {
   '/': typeof IndexRoute
   '/_authenticated': typeof AuthenticatedRouteRouteWithChildren
   '/_sponsor': typeof SponsorRouteRouteWithChildren
-  '/sponsors': typeof SponsorsRoute
+  '/sponsors': typeof SponsorsRouteWithChildren
   '/_authenticated/admin': typeof AuthenticatedAdminRouteWithChildren
   '/_authenticated/onboarding': typeof AuthenticatedOnboardingRoute
   '/_authenticated/profile': typeof AuthenticatedProfileRoute
-  '/_sponsor/sponsor': typeof SponsorSponsorRoute
+  '/_sponsor/sponsor': typeof SponsorSponsorRouteWithChildren
+  '/sponsors/reset-password': typeof SponsorsResetPasswordRoute
   '/_authenticated/admin/members': typeof AuthenticatedAdminMembersRoute
+  '/_sponsor/sponsor/members': typeof SponsorSponsorMembersRoute
+  '/_sponsor/sponsor/perks': typeof SponsorSponsorPerksRoute
+  '/_sponsor/sponsor/resumes': typeof SponsorSponsorResumesRouteWithChildren
+  '/_sponsor/sponsor/': typeof SponsorSponsorIndexRoute
   '/_authenticated/admin/categories/$categoryId': typeof AuthenticatedAdminCategoriesCategoryIdRoute
   '/_authenticated/admin/sponsors/$sponsorSlug': typeof AuthenticatedAdminSponsorsSponsorSlugRoute
+  '/_sponsor/sponsor/resumes/$categoryId': typeof SponsorSponsorResumesCategoryIdRoute
   '/_authenticated/admin/categories/': typeof AuthenticatedAdminCategoriesIndexRoute
   '/_authenticated/admin/sponsors/': typeof AuthenticatedAdminSponsorsIndexRoute
 }
@@ -143,9 +197,15 @@ export interface FileRouteTypes {
     | '/onboarding'
     | '/profile'
     | '/sponsor'
+    | '/sponsors/reset-password'
     | '/admin/members'
+    | '/sponsor/members'
+    | '/sponsor/perks'
+    | '/sponsor/resumes'
+    | '/sponsor/'
     | '/admin/categories/$categoryId'
     | '/admin/sponsors/$sponsorSlug'
+    | '/sponsor/resumes/$categoryId'
     | '/admin/categories/'
     | '/admin/sponsors/'
   fileRoutesByTo: FileRoutesByTo
@@ -155,10 +215,15 @@ export interface FileRouteTypes {
     | '/admin'
     | '/onboarding'
     | '/profile'
-    | '/sponsor'
+    | '/sponsors/reset-password'
     | '/admin/members'
+    | '/sponsor/members'
+    | '/sponsor/perks'
+    | '/sponsor/resumes'
+    | '/sponsor'
     | '/admin/categories/$categoryId'
     | '/admin/sponsors/$sponsorSlug'
+    | '/sponsor/resumes/$categoryId'
     | '/admin/categories'
     | '/admin/sponsors'
   id:
@@ -171,9 +236,15 @@ export interface FileRouteTypes {
     | '/_authenticated/onboarding'
     | '/_authenticated/profile'
     | '/_sponsor/sponsor'
+    | '/sponsors/reset-password'
     | '/_authenticated/admin/members'
+    | '/_sponsor/sponsor/members'
+    | '/_sponsor/sponsor/perks'
+    | '/_sponsor/sponsor/resumes'
+    | '/_sponsor/sponsor/'
     | '/_authenticated/admin/categories/$categoryId'
     | '/_authenticated/admin/sponsors/$sponsorSlug'
+    | '/_sponsor/sponsor/resumes/$categoryId'
     | '/_authenticated/admin/categories/'
     | '/_authenticated/admin/sponsors/'
   fileRoutesById: FileRoutesById
@@ -182,7 +253,7 @@ export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
   AuthenticatedRouteRoute: typeof AuthenticatedRouteRouteWithChildren
   SponsorRouteRoute: typeof SponsorRouteRouteWithChildren
-  SponsorsRoute: typeof SponsorsRoute
+  SponsorsRoute: typeof SponsorsRouteWithChildren
 }
 
 declare module '@tanstack/react-router' {
@@ -243,12 +314,47 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof SponsorSponsorRouteImport
       parentRoute: typeof SponsorRouteRoute
     }
+    '/sponsors/reset-password': {
+      id: '/sponsors/reset-password'
+      path: '/reset-password'
+      fullPath: '/sponsors/reset-password'
+      preLoaderRoute: typeof SponsorsResetPasswordRouteImport
+      parentRoute: typeof SponsorsRoute
+    }
     '/_authenticated/admin/members': {
       id: '/_authenticated/admin/members'
       path: '/members'
       fullPath: '/admin/members'
       preLoaderRoute: typeof AuthenticatedAdminMembersRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_sponsor/sponsor/': {
+      id: '/_sponsor/sponsor/'
+      path: '/'
+      fullPath: '/sponsor/'
+      preLoaderRoute: typeof SponsorSponsorIndexRouteImport
+      parentRoute: typeof SponsorSponsorRoute
+    }
+    '/_sponsor/sponsor/members': {
+      id: '/_sponsor/sponsor/members'
+      path: '/members'
+      fullPath: '/sponsor/members'
+      preLoaderRoute: typeof SponsorSponsorMembersRouteImport
+      parentRoute: typeof SponsorSponsorRoute
+    }
+    '/_sponsor/sponsor/perks': {
+      id: '/_sponsor/sponsor/perks'
+      path: '/perks'
+      fullPath: '/sponsor/perks'
+      preLoaderRoute: typeof SponsorSponsorPerksRouteImport
+      parentRoute: typeof SponsorSponsorRoute
+    }
+    '/_sponsor/sponsor/resumes': {
+      id: '/_sponsor/sponsor/resumes'
+      path: '/resumes'
+      fullPath: '/sponsor/resumes'
+      preLoaderRoute: typeof SponsorSponsorResumesRouteImport
+      parentRoute: typeof SponsorSponsorRoute
     }
     '/_authenticated/admin/categories/': {
       id: '/_authenticated/admin/categories/'
@@ -277,6 +383,13 @@ declare module '@tanstack/react-router' {
       fullPath: '/admin/sponsors/$sponsorSlug'
       preLoaderRoute: typeof AuthenticatedAdminSponsorsSponsorSlugRouteImport
       parentRoute: typeof AuthenticatedAdminRoute
+    }
+    '/_sponsor/sponsor/resumes/$categoryId': {
+      id: '/_sponsor/sponsor/resumes/$categoryId'
+      path: '/$categoryId'
+      fullPath: '/sponsor/resumes/$categoryId'
+      preLoaderRoute: typeof SponsorSponsorResumesCategoryIdRouteImport
+      parentRoute: typeof SponsorSponsorResumesRoute
     }
   }
 }
@@ -318,23 +431,66 @@ const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
 const AuthenticatedRouteRouteWithChildren =
   AuthenticatedRouteRoute._addFileChildren(AuthenticatedRouteRouteChildren)
 
+interface SponsorSponsorResumesRouteChildren {
+  SponsorSponsorResumesCategoryIdRoute: typeof SponsorSponsorResumesCategoryIdRoute
+}
+
+const SponsorSponsorResumesRouteChildren: SponsorSponsorResumesRouteChildren = {
+  SponsorSponsorResumesCategoryIdRoute: SponsorSponsorResumesCategoryIdRoute,
+}
+
+const SponsorSponsorResumesRouteWithChildren =
+  SponsorSponsorResumesRoute._addFileChildren(
+    SponsorSponsorResumesRouteChildren,
+  )
+
+interface SponsorSponsorRouteChildren {
+  SponsorSponsorMembersRoute: typeof SponsorSponsorMembersRoute
+  SponsorSponsorPerksRoute: typeof SponsorSponsorPerksRoute
+  SponsorSponsorResumesRoute: typeof SponsorSponsorResumesRouteWithChildren
+  SponsorSponsorIndexRoute: typeof SponsorSponsorIndexRoute
+}
+
+const SponsorSponsorRouteChildren: SponsorSponsorRouteChildren = {
+  SponsorSponsorMembersRoute: SponsorSponsorMembersRoute,
+  SponsorSponsorPerksRoute: SponsorSponsorPerksRoute,
+  SponsorSponsorResumesRoute: SponsorSponsorResumesRouteWithChildren,
+  SponsorSponsorIndexRoute: SponsorSponsorIndexRoute,
+}
+
+const SponsorSponsorRouteWithChildren = SponsorSponsorRoute._addFileChildren(
+  SponsorSponsorRouteChildren,
+)
+
 interface SponsorRouteRouteChildren {
-  SponsorSponsorRoute: typeof SponsorSponsorRoute
+  SponsorSponsorRoute: typeof SponsorSponsorRouteWithChildren
 }
 
 const SponsorRouteRouteChildren: SponsorRouteRouteChildren = {
-  SponsorSponsorRoute: SponsorSponsorRoute,
+  SponsorSponsorRoute: SponsorSponsorRouteWithChildren,
 }
 
 const SponsorRouteRouteWithChildren = SponsorRouteRoute._addFileChildren(
   SponsorRouteRouteChildren,
 )
 
+interface SponsorsRouteChildren {
+  SponsorsResetPasswordRoute: typeof SponsorsResetPasswordRoute
+}
+
+const SponsorsRouteChildren: SponsorsRouteChildren = {
+  SponsorsResetPasswordRoute: SponsorsResetPasswordRoute,
+}
+
+const SponsorsRouteWithChildren = SponsorsRoute._addFileChildren(
+  SponsorsRouteChildren,
+)
+
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
   AuthenticatedRouteRoute: AuthenticatedRouteRouteWithChildren,
   SponsorRouteRoute: SponsorRouteRouteWithChildren,
-  SponsorsRoute: SponsorsRoute,
+  SponsorsRoute: SponsorsRouteWithChildren,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

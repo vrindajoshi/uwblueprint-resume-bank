@@ -2,8 +2,18 @@ import { LogOut } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { useSignOut } from "@/lib/session";
 
-export function AppHeader({ email, subtitle }: { email?: string; subtitle?: string }) {
-  const signOut = useSignOut();
+export function AppHeader({
+  email,
+  subtitle,
+  onSignOut,
+}: {
+  email?: string;
+  subtitle?: string;
+  /** Overrides the default (Blueprint member/admin) sign-out, e.g. for the sponsor portal. */
+  onSignOut?: () => void | Promise<void>;
+}) {
+  const defaultSignOut = useSignOut();
+  const signOut = onSignOut ?? defaultSignOut;
 
   return (
     <header className="sticky top-0 z-30 border-b border-border bg-card/80 backdrop-blur">

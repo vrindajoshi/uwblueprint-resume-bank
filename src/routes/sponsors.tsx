@@ -3,9 +3,8 @@ import { useEffect, useState, type FormEvent } from "react";
 import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { sponsorSupabase } from "@/integrations/supabase/sponsor-client";
-import { requestSponsorOtp, verifySponsorOtp } from "@/lib/sponsor.functions";
+import { resetSponsorShuffleSeed } from "@/lib/sponsor-session";
 
 export const Route = createFileRoute("/sponsors")({
   head: () => ({
@@ -13,21 +12,20 @@ export const Route = createFileRoute("/sponsors")({
       { title: "UW Blueprint Sponsor Sign In" },
       {
         name: "description",
-        content:
-          "Sponsor sign-in for the UW Blueprint Resume Book. Enter your work email to get a one-time code.",
+        content: "Sponsor sign-in for the UW Blueprint Resume Book.",
       },
     ],
   }),
   component: SponsorLoginPage,
 });
 
-type Step = "checking" | "email" | "code";
+type Step = "checking" | "sign-in" | "forgot-password";
 
 function SponsorLoginPage() {
   const navigate = useNavigate();
   const [step, setStep] = useState<Step>("checking");
   const [email, setEmail] = useState("");
-  const [code, setCode] = useState("");
+  const [password, setPassword] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [notice, setNotice] = useState<string | null>(null);
@@ -37,7 +35,7 @@ function SponsorLoginPage() {
     sponsorSupabase.auth.getSession().then(({ data }) => {
       if (!active) return;
       if (data.session) navigate({ to: "/sponsor", replace: true });
-      else setStep("email");
+      else setStep("sign-in");
     });
     return () => {
       active = false;
@@ -45,14 +43,19 @@ function SponsorLoginPage() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const sendCode = async () => {
+  const signIn = async (e: FormEvent) => {
+    e.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      await requestSponsorOtp({ data: { email: email.trim() } });
-      setNotice("If this email is registered, a code has been sent. Check your inbox.");
-      setCode("");
-      setStep("code");
+      const { error: signInError } = await sponsorSupabase.auth.signInWithPassword({
+        email: email.trim(),
+        password,
+      });
+      if (signInError) throw new Error("Incorrect email or password.");
+      // New login -- give this sponsor session its own randomized resume order.
+      resetSponsorShuffleSeed();
+      navigate({ to: "/sponsor", replace: true });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
     } finally {
@@ -60,25 +63,15 @@ function SponsorLoginPage() {
     }
   };
 
-  const submitEmail = (e: FormEvent) => {
-    e.preventDefault();
-    void sendCode();
-  };
-
-  const submitCode = async (e: FormEvent) => {
+  const sendResetLink = async (e: FormEvent) => {
     e.preventDefault();
     setBusy(true);
     setError(null);
     try {
-      const result = await verifySponsorOtp({ data: { email: email.trim(), code } });
-      if (!result.ok) {
-        setError(result.error);
-        setCode("");
-        return;
-      }
-      const { error: sessionError } = await sponsorSupabase.auth.setSession(result.session);
-      if (sessionError) throw new Error(sessionError.message);
-      navigate({ to: "/sponsor", replace: true });
+      await sponsorSupabase.auth.resetPasswordForEmail(email.trim(), {
+        redirectTo: `${window.location.origin}/sponsors/reset-password`,
+      });
+      setNotice("If this email is registered, a reset link has been sent. Check your inbox.");
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");
     } finally {
@@ -101,12 +94,57 @@ function SponsorLoginPage() {
           <img src="/blueprint-logo.png" alt="UW Blueprint" className="mx-auto mb-6 h-16 w-16" />
           <h1 className="text-2xl font-bold text-foreground">Sponsor Sign In</h1>
 
-          {step === "email" ? (
+          {step === "sign-in" ? (
             <>
               <p className="mt-2 text-sm text-muted-foreground">
-                Enter your work email and we'll send you a one-time code.
+                Sign in with the email and password your UW Blueprint contact gave you.
               </p>
-              <form onSubmit={submitEmail} className="mt-8 space-y-4 text-left">
+              <form onSubmit={signIn} className="mt-8 space-y-4 text-left">
+                <Input
+                  type="email"
+                  required
+                  autoFocus
+                  placeholder="you@company.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  disabled={busy}
+                />
+                <Input
+                  type="password"
+                  required
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  disabled={busy}
+                />
+                <Button
+                  type="submit"
+                  size="lg"
+                  className="w-full font-semibold"
+                  disabled={busy || !email.trim() || !password}
+                >
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Sign in"}
+                </Button>
+                <button
+                  type="button"
+                  className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+                  onClick={() => {
+                    setStep("forgot-password");
+                    setError(null);
+                    setNotice(null);
+                  }}
+                  disabled={busy}
+                >
+                  Forgot password?
+                </button>
+              </form>
+            </>
+          ) : (
+            <>
+              <p className="mt-2 text-sm text-muted-foreground">
+                Enter your email and we'll send you a link to reset your password.
+              </p>
+              <form onSubmit={sendResetLink} className="mt-8 space-y-4 text-left">
                 <Input
                   type="email"
                   required
@@ -122,63 +160,20 @@ function SponsorLoginPage() {
                   className="w-full font-semibold"
                   disabled={busy || !email.trim()}
                 >
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send code"}
+                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Send reset link"}
                 </Button>
-              </form>
-            </>
-          ) : (
-            <>
-              <p className="mt-2 text-sm text-muted-foreground">
-                Enter the 6-digit code we sent to{" "}
-                <span className="font-medium text-foreground">{email}</span>.
-              </p>
-              <form onSubmit={submitCode} className="mt-8 space-y-4">
-                <div className="flex justify-center">
-                  <InputOTP
-                    maxLength={6}
-                    pattern="^[0-9]*$"
-                    value={code}
-                    onChange={setCode}
-                    disabled={busy}
-                    autoFocus
-                  >
-                    <InputOTPGroup>
-                      {Array.from({ length: 6 }, (_, i) => (
-                        <InputOTPSlot key={i} index={i} />
-                      ))}
-                    </InputOTPGroup>
-                  </InputOTP>
-                </div>
-                <Button
-                  type="submit"
-                  size="lg"
-                  className="w-full font-semibold"
-                  disabled={busy || code.length !== 6}
+                <button
+                  type="button"
+                  className="block w-full text-center text-sm text-muted-foreground underline-offset-4 hover:underline"
+                  onClick={() => {
+                    setStep("sign-in");
+                    setError(null);
+                    setNotice(null);
+                  }}
+                  disabled={busy}
                 >
-                  {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : "Verify"}
-                </Button>
-                <div className="flex items-center justify-between text-sm">
-                  <button
-                    type="button"
-                    className="text-muted-foreground underline-offset-4 hover:underline"
-                    onClick={() => {
-                      setStep("email");
-                      setError(null);
-                      setNotice(null);
-                    }}
-                    disabled={busy}
-                  >
-                    Use a different email
-                  </button>
-                  <button
-                    type="button"
-                    className="font-medium text-primary underline-offset-4 hover:underline"
-                    onClick={() => void sendCode()}
-                    disabled={busy}
-                  >
-                    Resend code
-                  </button>
-                </div>
+                  Back to sign in
+                </button>
               </form>
             </>
           )}

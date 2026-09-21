@@ -88,7 +88,17 @@ export const allResumesQuery = queryOptions({
   },
 });
 
-export type Sponsor = { id: string; name: string; slug: string; created_at: string };
+export type LogoSource = "favicon" | "custom";
+
+export type Sponsor = {
+  id: string;
+  name: string;
+  slug: string;
+  website_url: string;
+  logo_url: string | null;
+  logo_source: LogoSource;
+  created_at: string;
+};
 
 export type SponsorEmail = {
   id: string;
@@ -146,6 +156,30 @@ export const allSponsorPerksQuery = queryOptions({
     const { data, error } = await supabase.from("sponsor_perks").select("*");
     if (error) throw new Error(error.message);
     return (data ?? []) as SponsorPerk[];
+  },
+});
+
+export type InviteRequestStatus = "pending" | "approved" | "dismissed";
+
+export type SponsorInviteRequest = {
+  id: string;
+  sponsor_id: string;
+  requested_by: string;
+  invited_email: string;
+  status: InviteRequestStatus;
+  created_at: string;
+};
+
+export const pendingSponsorInviteRequestsQuery = queryOptions({
+  queryKey: ["admin", "sponsor-invite-requests"],
+  queryFn: async (): Promise<SponsorInviteRequest[]> => {
+    const { data, error } = await supabase
+      .from("sponsor_invite_requests")
+      .select("*")
+      .eq("status", "pending")
+      .order("created_at");
+    if (error) throw new Error(error.message);
+    return (data ?? []) as SponsorInviteRequest[];
   },
 });
 
