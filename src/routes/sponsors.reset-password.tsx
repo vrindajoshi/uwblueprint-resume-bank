@@ -4,6 +4,7 @@ import { Loader2 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sponsorSupabase } from "@/integrations/supabase/sponsor-client";
+import { sponsorConfirmPasswordChanged } from "@/lib/sponsor.functions";
 
 export const Route = createFileRoute("/sponsors/reset-password")({
   head: () => ({
@@ -61,6 +62,13 @@ function ResetPasswordPage() {
     try {
       const { error: updateError } = await sponsorSupabase.auth.updateUser({ password });
       if (updateError) throw new Error(updateError.message);
+
+      // Defensive: covers a sponsor who never completed the forced first
+      // password change and instead reset via this flow directly.
+      const { data: sessionData } = await sponsorSupabase.auth.getSession();
+      const accessToken = sessionData.session?.access_token;
+      if (accessToken) await sponsorConfirmPasswordChanged({ data: { accessToken } });
+
       setStep("done");
       setTimeout(() => navigate({ to: "/sponsor", replace: true }), 1200);
     } catch (e) {

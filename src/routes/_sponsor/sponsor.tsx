@@ -7,7 +7,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { sponsorSupabase } from "@/integrations/supabase/sponsor-client";
 import { sponsorSessionQuery, useSponsorSession, useSponsorSignOut } from "@/lib/sponsor-session";
-import { sponsorChangePassword } from "@/lib/sponsor.functions";
+import { sponsorConfirmPasswordChanged } from "@/lib/sponsor.functions";
 
 export const Route = createFileRoute("/_sponsor/sponsor")({
   head: () => ({
@@ -131,10 +131,15 @@ function SetPasswordGate({ onSignOut }: { onSignOut: () => void }) {
     }
     setBusy(true);
     try {
+      // Client-side self-update -- keeps the current session valid, unlike
+      // going through the admin API (see sponsorConfirmPasswordChanged).
+      const { error: updateError } = await sponsorSupabase.auth.updateUser({ password });
+      if (updateError) throw new Error(updateError.message);
+
       const { data: sessionData } = await sponsorSupabase.auth.getSession();
       const accessToken = sessionData.session?.access_token;
-      if (!accessToken) throw new Error("Your session expired. Sign in again.");
-      await sponsorChangePassword({ data: { accessToken, newPassword: password } });
+      if (accessToken) await sponsorConfirmPasswordChanged({ data: { accessToken } });
+
       await queryClient.invalidateQueries({ queryKey: sponsorSessionQuery.queryKey });
     } catch (e) {
       setError(e instanceof Error ? e.message : "Something went wrong. Try again.");

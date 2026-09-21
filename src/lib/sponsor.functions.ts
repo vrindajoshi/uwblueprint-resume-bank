@@ -124,12 +124,16 @@ export const sponsorBootstrapSession = createServerFn({ method: "POST" })
   });
 
 /**
- * Lets a signed-in sponsor contact set their own password -- required right
- * after their first sign-in with an admin-issued temp password, and reusable
- * for any later voluntary change.
+ * Clears must_change_password after a sponsor contact has set their own
+ * password. The password change itself must happen client-side via
+ * sponsorSupabase.auth.updateUser() -- doing it through the admin API here
+ * instead invalidates the caller's own current session as a side effect
+ * (confirmed against the live project: an admin-issued password change
+ * immediately breaks the session that made the request), which bounced
+ * sponsors back to the login page right after they'd just signed in.
  */
-export const sponsorChangePassword = createServerFn({ method: "POST" })
-  .inputValidator((input: { accessToken: string; newPassword: string }) => input)
+export const sponsorConfirmPasswordChanged = createServerFn({ method: "POST" })
+  .inputValidator((input: { accessToken: string }) => input)
   .handler(async ({ data }) => {
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
 
@@ -143,11 +147,6 @@ export const sponsorChangePassword = createServerFn({ method: "POST" })
       .eq("email", email)
       .maybeSingle();
     if (!sponsorEmail) throw new Error("Not signed in as a sponsor contact.");
-
-    const { error: updateError } = await supabaseAdmin.auth.admin.updateUserById(userData.user.id, {
-      password: data.newPassword,
-    });
-    if (updateError) throw new Error(updateError.message);
 
     await supabaseAdmin
       .from("sponsor_emails")
