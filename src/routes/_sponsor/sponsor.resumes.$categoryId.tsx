@@ -132,12 +132,20 @@ function SponsorCategoryDetail() {
             <Button
               variant="outline"
               size="sm"
-              onClick={async () => {
-                try {
-                  window.open(await sponsorSignedUrlFor(row.file_path), "_blank", "noopener");
-                } catch (e) {
-                  toast.error(e instanceof Error ? e.message : "Failed to open.");
-                }
+              onClick={() => {
+                // Open the tab synchronously, in direct response to the click,
+                // then point it at the signed URL once it resolves -- opening
+                // only after the await would lose the user-gesture context
+                // most browsers require, and get silently popup-blocked.
+                const tab = window.open("", "_blank", "noopener");
+                sponsorSignedUrlFor(row.file_path)
+                  .then((url) => {
+                    if (tab) tab.location.href = url;
+                  })
+                  .catch((e) => {
+                    tab?.close();
+                    toast.error(e instanceof Error ? e.message : "Failed to open.");
+                  });
               }}
             >
               View
